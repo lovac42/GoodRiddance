@@ -2,7 +2,7 @@
 # Copyright: (C) 2019 Lovac42
 # Support: https://github.com/lovac42/GoodRiddance
 # License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
-# Version: 0.0.2
+# Version: 0.0.3
 
 
 import re
@@ -17,6 +17,10 @@ TYPE={
     'ogg': "audio/ogg",
 }
 
+
+RE_MEDIA=re.compile(r"\[sound:(.*?\.(webm|ogv|ogg))\]", re.I)
+
+
 def inline_media(html, *args, **kwargs):
     def subVideoTag(sound):
         type=TYPE.get(sound.group(2))
@@ -25,11 +29,12 @@ def inline_media(html, *args, **kwargs):
 <source src="%s" type="%s">
 </video>
 """%(sound.group(1),type)
-    html=re.sub(r"\[sound:(.*?\.(webm|ogv|ogg))\]", subVideoTag, html)
+    html=RE_MEDIA.sub(subVideoTag, html)
     return html + """
 <script>
 window.setTimeout(function(){
-    document.querySelector('.autoplay').play();
+  var vid=document.querySelector('.autoplay');
+  if(vid) vid.play();
 },500);
 </script>"""
 
@@ -42,11 +47,12 @@ addHook("mungeQA", inline_media)
 # Use title addon to signal AHK
 # Mouse pointer must be within the reviewer window.
 
-def onShowQ():
+def trigger():
     title=mw.windowTitle()
     mw.setWindowTitle("Anki - autoplay")
     mw.progress.timer(300,
                 lambda: mw.setWindowTitle(title),
                 False, requiresCollection=False)
 
-addHook("showQuestion", onShowQ)
+addHook("showQuestion", trigger)
+addHook("showAnswer", trigger)

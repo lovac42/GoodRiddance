@@ -2,7 +2,7 @@
 # Copyright: (C) 2019 Lovac42
 # Support: https://github.com/lovac42/GoodRiddance
 # License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
-# Version: 0.0.3
+# Version: 0.0.4
 
 
 import re
@@ -29,8 +29,11 @@ def inline_media(html, *args, **kwargs):
 <source src="%s" type="%s">
 </video>
 """%(sound.group(1),type)
-    html=RE_MEDIA.sub(subVideoTag, html)
-    return html + """
+
+    s,cnt=RE_MEDIA.subn(subVideoTag, html)
+    if not cnt:
+        return html
+    return s + """
 <script>
 window.setTimeout(function(){
   var vid=document.querySelector('.autoplay');
